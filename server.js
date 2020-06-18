@@ -12,15 +12,15 @@ app.use(express.json())
 
 // Default route
 app.get('/', (req, res) => {
-    res.sendFile(join(__dirname, "/public/notes.html"))
+    res.sendFile(join(__dirname, "public/notes.html"))
   })
   
   // Notes route
   app.get('/notes', (req, res) => {
-    res.sendFile(join(__dirname, "/public/notes.html"))
+    res.sendFile(join(__dirname, "public/notes.html"))
   })
 
 //Use routes that created in the listRoute.js for API request
 app.use(require('./routes'))
 //event listener for server
-app.listen(3000, () => console.log('http://localhost:3000'))
+app.listen(process.env.PORT | 3000, () => console.log("http://localhost:3000"));

@@ -1,36 +1,55 @@
-const router = require('express').Router()
-const { writeFile } = require('fs')
+const router = require("express").Router();
+const note = require("../public/db/db.json");
 
-let notes = (require("../db/db.json"))
-console.log(notes)
+const { writeFile } = require("fs");
+const { promisify } = require("util");
 
-router.get('/api/notes', (req, res) => {
-    res.json(notes)
-})
+const wfs = promisify(writeFile);
 
-router.post('/api/notes', (req, res) => {
-    console.log("comming from the post:", req.body)
-    // calcualte an id for the new note
-    let newId = notes.length === 0 ?  1  :  notes[notes.length - 1].id + 1   //ES6
-    let newNotes = req.body
-    newNotes.id = newId
-    notes.push(newNotes) 
-    writeFile('./db/db.json', JSON.stringify(notes), function () {
-        res.json("done")
-    })
+// GET items
+router.get("/api/notes", (req, res) => {
+  res.send(note);
+});
 
-})
+// POST items
+router.post("/api/notes", (req, res) => {
+  //Create two new variables that hold the title and text
+  let { title, text } = req.body;
 
-router.delete('/api/notes/:id', (req, res) => {
-    console.log(req.params)
+  //Push new note into note
+  note.push({ title, text, id: `${note.length}` });
 
-    let newNotes = notes.filter(note => note.id !== parseInt(req.params.id)) ///ES6
+  //Update database
+  update_db();
+  console.log(note);
+  //Return an updated note
+  res.send(note);
+});
 
-    notes = newNotes
-    // eliminate the note from the array and rewrite the file
-    writeFile('./db/db.json', JSON.stringify(notes), function () {
-        res.json("done")
-    })
-})
+// DELETE items
+router.delete("/api/notes/:id", (req, res) => {
+  //Remove a note from a specific index/id
+  note.splice(req.params.id, 1);
 
-module.exports = router
+  //Re-assign id to each note start from the deleted note to the end
+  //To ensure that all id are in order, which make it easy for handling when deleting note
+  for (let i = req.params.id; i < note.length; i++) {
+    note[i].id = `${i}`;
+  }
+
+  //Update database
+  update_db();
+
+  //Return an updated note
+  res.send(note);
+});
+
+// A function that re-write/update database
+let update_db = () => {
+  wfs("../public/db/db.json", JSON.stringify(note))
+    .then((res) => console.log("Succeed"))
+    .catch((err) => console.log(err));
+};
+
+//Export router out for express to use
+module.exports = router;
