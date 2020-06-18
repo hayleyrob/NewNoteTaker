@@ -13,8 +13,8 @@ app.use(express.json())
 app.use(require('./routes/noteRoutes'))
 //route to connect /notes with notes.html
 app.get('/notes', (req, res) => {
-  res.sendFile(join(__dirname,
-    './public/notes.html'
+  res.sendFile(join(__dirname +
+    '/public/notes.html'
   ))
 })
 //route to connect * with index.html
